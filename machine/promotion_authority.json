@@ -1,0 +1,11 @@
+{
+  "schema": "glaciereq.promotion-authority-grant.v1",
+  "repository": "GlacierEQ/blue-origin-cryo-telemetry-half-life",
+  "source_sha": "42908a91af00adb8775ca35df3b8be756244ee08c23c2f1c700be657ed21f32b",
+  "proof_receipt_digest": "c37bc43f1ee260114f9cca88ca8d8f586e3267f2a764565645a64b732d67a043",
+  "not_after": 1788948644.4167738,
+  "mac": "9d2a7b20000f421c8ae43a0d02f159281bf9c37f4f2984b948cc78a019b0db8a",
+  "issuer": "local_operator_promotion_authority",
+  "verified": true,
+  "secret_ref": "src/promotion_authority.py::LOCAL_OPERATOR_SECRET"
+}

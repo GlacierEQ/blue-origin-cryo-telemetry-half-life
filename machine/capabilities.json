@@ -1,0 +1,12 @@
+{
+  "schema": "glaciereq.repo-capabilities.v1",
+  "repository": "GlacierEQ/blue-origin-cryo-telemetry-half-life",
+  "capabilities": [
+    {
+      "id": "cryo-telemetry-half-life",
+      "name": "Cryo Telemetry Half-Life",
+      "status": "SCAFFOLD",
+      "module": "src/cryo_telemetry_half_life.py"
+    }
+  ]
+}
