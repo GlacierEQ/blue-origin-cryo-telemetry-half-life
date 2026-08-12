@@ -1,51 +1,78 @@
 # Cryo Telemetry Half-Life
 
-Independent GlacierEQ portfolio exhibit aligned to **Blue Origin** operating themes.
+A vendor-neutral eligibility kernel for simulated command workflows that require fresh telemetry and independent approvals.
 
-> **Not affiliated.** This repository is not affiliated with, endorsed by, employed by, or deployed at Blue Origin.
-> No proprietary access, production deployment, customer impact, or company partnership is claimed.
+> Independent GlacierEQ implementation. Not affiliated with, endorsed by, employed by, or deployed at Blue Origin. It does not actuate hardware or claim flight use.
 
-## Bottleneck (GlacierEQ hypothesis)
+## Purpose
 
-Production, integration, test, quality, and software coordination across complex physical programs.
+Telemetry-backed decisions become unsafe or meaningless when the underlying measurements outlive their useful freshness window. A command can also be over-authorized when one person or one key silently satisfies every approval role.
 
-**Brick wall:** Meeting reliability and schedule while hardware, facilities, suppliers, and mission requirements evolve together.
+Cryo Telemetry Half-Life converts those failure modes into deterministic, testable eligibility state before any separate executor or simulator is allowed to proceed.
 
-**Observed public pressure (snapshot hypothesis):** Launch vehicles, engines, lunar systems, manufacturing, test, and mission software are scaling in parallel.
+## Capabilities
 
-## Innovation mechanism
+- explicit evaluation time for deterministic replay
+- per-channel observation time and half-life
+- quality-weighted exponential freshness: `quality × 0.5^(age / half_life)`
+- explicit required telemetry channels
+- configurable minimum freshness threshold
+- refusal of missing, stale, duplicate, future-dated, malformed, or low-quality telemetry
+- optional telemetry source SHA-256 identity
+- explicit required approval roles
+- approval time-to-live
+- distinct-key enforcement
+- distinct-principal enforcement
+- refusal of missing, duplicated, future-dated, or expired approvals
+- optional evidence SHA-256 identity
+- strict JSON command/telemetry values
+- deterministic authorization receipts
+- bounded work accounting
+- installable CLI
 
-**Cryo Telemetry Half-Life** — Attach half-life clocks to command authority and refuse actuation when freshness or dual-key conditions fail.
+## Input
 
-## Target roles
+```json
+{
+  "subject_id": "simulation-command-1",
+  "budget": 4.0,
+  "payload": {
+    "now": 1000.0,
+    "command": {"name": "simulation-stage-transition", "mode": "simulation"},
+    "required_channels": ["tank.pressure", "tank.temperature"],
+    "min_freshness": 0.5,
+    "telemetry": [
+      {"channel": "tank.pressure", "observed_at": 996.0, "half_life_s": 20.0, "quality": 1.0},
+      {"channel": "tank.temperature", "observed_at": 997.0, "half_life_s": 20.0, "quality": 0.95}
+    ],
+    "required_roles": ["operator", "safety"],
+    "approval_ttl_s": 30.0,
+    "approvals": [
+      {"key_id": "operator-key", "principal": "operator-a", "role": "operator", "approved_at": 998.0},
+      {"key_id": "safety-key", "principal": "safety-b", "role": "safety", "approved_at": 999.0}
+    ]
+  }
+}
+```
 
-- Applied AI Systems Architect
-- Forward-Deployed Engineer
-- AI Infrastructure / Governance Engineer
+Run:
 
-## Application move
+```bash
+cryo-telemetry-half-life --input request.json
+```
 
-Translate aerospace repos into a neutral launch-and-mission systems portfolio.
+Exit status is zero only when the declared command is eligible. The receipt includes normalized telemetry, approvals, freshness metrics, refusal reasons, and a deterministic digest.
 
-## Current scaffold state
+## Verify the repository
 
-This leaf is a **scaffold**: contracts, tests, and a stub mechanism exist so another engineer/AI can fill production-grade code without inventing company affiliation.
+```bash
+python -m pip install .
+python -m pytest -q
+python scripts/operate.py
+```
 
-| Surface | Path |
-|---------|------|
-| Mechanism stub | `src/cryo_telemetry_half_life.py` |
-| Operate entry | `scripts/operate.py` |
-| Contract tests | `tests/` |
-| Target contract | `machine/target-contract.json` |
-| **AI fill-in brief** | **`DEV_UP_INSTRUCTIONS.md`** |
-| Issue contract | `ISSUE_CONTRACT.md` |
+The direct runtime smoke proves a fresh dual-key simulation command is eligible, stale required telemetry is refused, and reusing one principal for both roles is refused.
 
-## Non-claims
+## Safety and integration boundary
 
-- No Blue Origin employment, endorsement, proprietary data, or production use
-- No customer, revenue, latency, or scale claims without separate receipts
-- Scaffold tests define **intended behavior**, not verified production excellence
-
-## Next gate
-
-Map current software and systems roles to public proof and identify missing physical-test boundaries.
+This repository **does not issue physical commands**. It only evaluates a normalized request and produces `ALLOW`/`REFUSE` eligibility. Any hardware, vehicle, facility, or mission executor remains a separate system with its own authenticated interfaces, physical safety interlocks, certified procedures, and human authority. This package is appropriate for local simulation, software testing, and generic freshness-policy evaluation.
