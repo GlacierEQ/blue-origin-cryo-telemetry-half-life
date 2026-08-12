@@ -11,5 +11,18 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install -r requirements.txt
+      - run: python -m pip install .
       - run: python -m pytest -q
       - run: python scripts/operate.py
+      - name: installed CLI fresh and stale smoke
+        run: |
+          cat > /tmp/fresh.json <<'JSON'
+          {"subject_id":"ci-sim","budget":4.0,"payload":{"now":1000.0,"command":{"name":"simulation-stage-transition","mode":"simulation"},"required_channels":["tank.pressure"],"min_freshness":0.5,"telemetry":[{"channel":"tank.pressure","observed_at":996.0,"half_life_s":20.0,"quality":1.0}],"required_roles":["operator","safety"],"approval_ttl_s":30.0,"approvals":[{"key_id":"op","principal":"operator-a","role":"operator","approved_at":998.0},{"key_id":"safe","principal":"safety-b","role":"safety","approved_at":999.0}]}}
+          JSON
+          cryo-telemetry-half-life --input /tmp/fresh.json > /tmp/fresh.out
+          python -c 'import json; d=json.load(open("/tmp/fresh.out")); assert d["decision"] == "ALLOW"; assert d["result"]["eligible"] is True'
+          cat > /tmp/stale.json <<'JSON'
+          {"subject_id":"ci-sim","budget":4.0,"payload":{"now":1000.0,"command":{"name":"simulation-stage-transition","mode":"simulation"},"required_channels":["tank.pressure"],"min_freshness":0.5,"telemetry":[{"channel":"tank.pressure","observed_at":900.0,"half_life_s":20.0,"quality":1.0}],"required_roles":["operator","safety"],"approval_ttl_s":30.0,"approvals":[{"key_id":"op","principal":"operator-a","role":"operator","approved_at":998.0},{"key_id":"safe","principal":"safety-b","role":"safety","approved_at":999.0}]}}
+          JSON
+          if cryo-telemetry-half-life --input /tmp/stale.json > /tmp/stale.out; then exit 1; fi
+          python -c 'import json; d=json.load(open("/tmp/stale.out")); assert d["decision"] == "REFUSE"; assert "telemetry_tank.pressure_stale" in d["reasons"]'
