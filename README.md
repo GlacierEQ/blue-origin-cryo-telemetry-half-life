@@ -6,13 +6,15 @@ A vendor-neutral eligibility kernel for simulated command workflows that require
 
 ## Purpose
 
-Telemetry-backed decisions become unsafe or meaningless when the underlying measurements outlive their useful freshness window. A command can also be over-authorized when one person or one key silently satisfies every approval role.
+Telemetry-backed decisions become unsafe or meaningless when the underlying measurements outlive their useful freshness window. A command can also be over-authorized when one person or one key silently satisfies every required approval role.
 
 Cryo Telemetry Half-Life converts those failure modes into deterministic, testable eligibility state before any separate executor or simulator is allowed to proceed.
 
 ## Capabilities
 
 - explicit evaluation time for deterministic replay
+- request-level expiry via `not_after`
+- strict request/grant/telemetry/approval identity types; malformed JSON values are refused rather than string-coerced
 - per-channel observation time and half-life
 - quality-weighted exponential freshness: `quality × 0.5^(age / half_life)`
 - explicit required telemetry channels
@@ -21,13 +23,15 @@ Cryo Telemetry Half-Life converts those failure modes into deterministic, testab
 - optional telemetry source SHA-256 identity
 - explicit required approval roles
 - approval time-to-live
-- distinct-key enforcement
-- distinct-principal enforcement
-- refusal of missing, duplicated, future-dated, or expired approvals
-- optional evidence SHA-256 identity
-- strict JSON command/telemetry values
+- deterministic selection of one approval per required role such that every selected approval has a distinct key **and** distinct principal
+- unrelated-role approvals cannot satisfy or pad the required-role independence invariant
+- refusal of missing, duplicated, future-dated, expired, or non-independent approvals
+- normalized evidence identity computed from command, telemetry, required channels, freshness policy, required roles, approval TTL, and approvals
+- optional `evidence_digest` input is treated as an expected trusted digest and must match the computed evidence identity
+- strict bounded JSON command/telemetry values
+- collection caps and preflight work refusal before telemetry/approval normalization
+- bounded CLI input before JSON parsing
 - deterministic authorization receipts
-- bounded work accounting
 - installable CLI
 
 ## Input
@@ -35,6 +39,7 @@ Cryo Telemetry Half-Life converts those failure modes into deterministic, testab
 ```json
 {
   "subject_id": "simulation-command-1",
+  "not_after": 1030.0,
   "budget": 4.0,
   "payload": {
     "now": 1000.0,
@@ -61,7 +66,11 @@ Run:
 cryo-telemetry-half-life --input request.json
 ```
 
-Exit status is zero only when the declared command is eligible. The receipt includes normalized telemetry, approvals, freshness metrics, refusal reasons, and a deterministic digest.
+Exit status is zero only when the declared command is eligible. The receipt includes normalized telemetry, all valid approvals, the independently selected required-role approvals, freshness metrics, the computed `evidence_digest`, refusal reasons, and a deterministic receipt digest.
+
+### Bind a previously trusted evidence snapshot
+
+First evaluate without `payload.evidence_digest` and retain the returned `result.evidence_digest`. A later candidate may provide that value as `payload.evidence_digest`. The evaluator recomputes evidence identity and refuses with `evidence_digest_mismatch` if command, telemetry, approval policy, or approvals have changed.
 
 ## Verify the repository
 
@@ -71,7 +80,7 @@ python -m pytest -q
 python scripts/operate.py
 ```
 
-The direct runtime smoke proves a fresh dual-key simulation command is eligible, stale required telemetry is refused, and reusing one principal for both roles is refused.
+The direct runtime smoke proves a fresh independently approved simulation command is eligible, the computed evidence digest can be re-verified, stale required telemetry is refused, unrelated approvals cannot mask reuse of one required-role principal, and evidence mutation invalidates an old expected digest.
 
 ## Safety and integration boundary
 
