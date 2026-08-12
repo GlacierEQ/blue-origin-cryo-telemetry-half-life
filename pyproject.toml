@@ -1,9 +1,20 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "blue-origin-cryo-telemetry-half-life"
-version = "0.0.1"
-description = "Scaffold: Cryo Telemetry Half-Life (independent Blue Origin lens)"
+version = "1.0.0"
+description = "Deterministic telemetry freshness and dual-key eligibility evaluation for simulated command workflows"
 requires-python = ">=3.11"
 dependencies = []
+
+[project.scripts]
+cryo-telemetry-half-life = "cryo_telemetry_half_life:cli"
+
+[tool.setuptools]
+py-modules = ["cryo_telemetry_half_life"]
+package-dir = {"" = "src"}
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
