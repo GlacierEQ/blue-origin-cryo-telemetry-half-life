@@ -12,10 +12,11 @@ import json
 import math
 import re
 import sys
+from collections.abc import Mapping, Sequence
 from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import Any, Mapping, Sequence
+from typing import Any
 
 _SHA256 = re.compile(r"^[0-9a-fA-F]{64}$")
 

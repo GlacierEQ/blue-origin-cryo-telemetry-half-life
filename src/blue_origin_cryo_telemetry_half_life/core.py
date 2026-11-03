@@ -1,8 +1,9 @@
 """Cryogenic Propellant & Propulsion Telemetry — Core Module"""
 
 import math
-from dataclasses import dataclass, field
-from typing import Optional
+from dataclasses import dataclass
+from typing import ClassVar
+
 
 @dataclass
 class CryoTank:
@@ -47,7 +48,7 @@ class EngineHealthTelemetry:
     mixture_ratio: float  # oxidizer/fuel mass flow ratio
     thrust_kn: float
 
-    NOMINAL_RANGES = {
+    NOMINAL_RANGES: ClassVar[dict[str, tuple[float, float]]] = {
         "chamber_pressure_psi": (2500.0, 3200.0),
         "turbopump_rpm": (30000.0, 38000.0),
         "nozzle_temp_k": (800.0, 1800.0),
@@ -61,7 +62,7 @@ class EngineHealthTelemetry:
         for param, (lo, hi) in self.NOMINAL_RANGES.items():
             val = getattr(self, param)
             if val < lo or val > hi:
-                issues.append(f"{{param}}={{val:.1f}} outside [{{lo}}, {{hi}}]")
+                issues.append(f"{param}={val:.1f} outside [{lo}, {hi}]")
         return issues
 
     @property

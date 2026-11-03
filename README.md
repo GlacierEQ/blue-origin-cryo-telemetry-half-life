@@ -72,6 +72,36 @@ Exit status is zero only when the declared command is eligible. The receipt incl
 
 First evaluate without `payload.evidence_digest` and retain the returned `result.evidence_digest`. A later candidate may provide that value as `payload.evidence_digest`. The evaluator recomputes evidence identity and refuses with `evidence_digest_mismatch` if command, telemetry, approval policy, or approvals have changed.
 
+## Epistemology / Verification
+
+Verification levels for this repository (honest status):
+
+- **L0 (Presence):** Verified. Source modules (`src/cryo_telemetry_half_life.py`, `src/blue_origin_cryo_telemetry_half_life/core.py`, `src/impact_assurance.py`) exist and import cleanly.
+- **L1 (Structure):** Verified. Public classes/functions (`CryoTelemetryHalfLife`, `CryoTank`, `EngineHealthTelemetry`, `ImpactVector`, `assess`, `rank`, `cli`) exist with documented signatures.
+- **L2 (Behavior):** Verified. 30 tests pass (`pytest tests/ -v`), `ruff check src/ tests/` is clean, and `scripts/operate.py` exits 0 (fresh eligible command, stale telemetry refused, independence bypass refused, evidence mismatch refused).
+
+### Aspirational (L0/L1 only)
+
+The following are **not** L2-verified and are labeled aspirational:
+
+- Hardware actuation, flight use, or mission execution (explicitly out of scope; this repo only evaluates eligibility).
+- External deployment, affiliation with, or endorsement by Blue Origin.
+- Any claim beyond local simulation, software testing, and generic freshness-policy evaluation.
+
+### Verification commands
+
+```bash
+PYTHONPATH=src pytest tests/ -v
+ruff check src/ tests/
+python scripts/operate.py
+python -m pip install .
+cryo-telemetry-half-life --input request.json
+```
+
+### Not claimed
+
+This repository does not issue physical commands, is not deployed at any launch site, and is not affiliated with, endorsed by, employed by, or deployed at Blue Origin. No external deployment is claimed.
+
 ## Verify the repository
 
 ```bash

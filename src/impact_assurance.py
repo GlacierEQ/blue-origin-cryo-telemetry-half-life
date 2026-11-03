@@ -6,9 +6,9 @@ score changes before they are promoted.
 """
 from __future__ import annotations
 
+from collections.abc import Iterable
 from dataclasses import asdict, dataclass
 from math import isfinite
-from typing import Iterable
 
 REPOSITORY = "blue-origin-cryo-telemetry-half-life"
 COMPANY_LENS = "Blue Origin"

@@ -1,10 +1,11 @@
 """Auto-generated tests for Cryogenic Propellant & Propulsion Telemetry."""
 import sys
 from pathlib import Path
+
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-import math
 from blue_origin_cryo_telemetry_half_life.core import CryoTank, EngineHealthTelemetry
+
 
 def test_initial_mass():
     tank = CryoTank(volume_m3=100.0, fill_fraction=0.95,

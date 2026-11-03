@@ -1,6 +1,10 @@
 from copy import deepcopy
 
-from cryo_telemetry_half_life import Decision, CryoTelemetryHalfLife, CryoTelemetryHalfLifeRequest
+from cryo_telemetry_half_life import (
+    CryoTelemetryHalfLife,
+    CryoTelemetryHalfLifeRequest,
+    Decision,
+)
 
 
 def _payload() -> dict:
